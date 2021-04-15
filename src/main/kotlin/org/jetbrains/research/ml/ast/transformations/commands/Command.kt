@@ -7,11 +7,11 @@ import java.util.concurrent.Callable
 class Command<T>(val redo: Callable<T>, val undo: Callable<*>, val description: String)
 
 // maybe there is a better way
-abstract class CommandProvider<P, T> {
-    protected abstract fun redo(input: P): Callable<T>
-    protected abstract fun undo(input: P): Callable<*>
+abstract class CommandProvider<T> {
+    protected abstract fun redo(): Callable<T>
+    protected abstract fun undo(): Callable<*>
 
-    fun getCommand(input: P, description: String) = Command(redo(input), undo(input), description)
+    fun getCommand(description: String) = Command(redo(), undo(), description)
 }
 
 /* Todo: add commands for:

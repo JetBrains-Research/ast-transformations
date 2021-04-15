@@ -14,13 +14,13 @@ class RenamablePsiElement(private val psiElement: PsiElement, newName: String) {
     private val delayedNewRenames = renameElementDelayed(psiElement, newName)
     private val delayedOldRenames = renameElementDelayed(psiElement, oldName)
 
-    fun redo() {
+    fun performNewRenames() {
         WriteCommandAction.runWriteCommandAction(psiElement.project) {
             delayedNewRenames()
         }
     }
 
-    fun undo() {
+    fun performOldRenames() {
         WriteCommandAction.runWriteCommandAction(psiElement.project) {
             delayedOldRenames()
         }
@@ -50,11 +50,15 @@ class RenamablePsiElement(private val psiElement: PsiElement, newName: String) {
 
 /**
  * Rename psiElement and all references
+ * NOTE: all renamablePsiElements should be initialized BEFORE the first RenameCommand performing
  */
-object RenameCommand : CommandProvider<RenamablePsiElement, Unit>() {
+class RenameCommand(private val renamablePsiElement: RenamablePsiElement) : CommandProvider<Unit>() {
 
-    override fun redo(input: RenamablePsiElement): Callable<Unit> = Callable { input.redo() }
+    override fun redo(): Callable<Unit> {
+        return Callable {
+            renamablePsiElement.performNewRenames()
+        }
+    }
 
-    override fun undo(input: RenamablePsiElement): Callable<*> = Callable { input.undo() }
-
+    override fun undo(): Callable<*> = Callable { renamablePsiElement.performOldRenames() }
 }

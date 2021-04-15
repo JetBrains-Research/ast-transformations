@@ -23,7 +23,7 @@ internal class MultipleOperatorComparisonVisitor(private val commandPerformer: I
         val generator = PyElementGenerator.getInstance(node.project)
         val newBinaryExpression = transformMultipleComparisonExpression(node, generator) ?: return
         val newBracedExpression = PyUtils.braceExpression(newBinaryExpression)
-        // Todo: replace { } with the real undo
+        // Todo: replace
         commandPerformer.performCommand(
             Command(
                 { node.replace(newBracedExpression) },

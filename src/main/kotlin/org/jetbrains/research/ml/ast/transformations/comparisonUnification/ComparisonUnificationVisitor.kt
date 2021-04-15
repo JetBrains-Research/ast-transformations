@@ -42,7 +42,7 @@ internal class ComparisonUnificationVisitor(private val commandsPerformer: IComm
         val right = rightExpression ?: return
         val generator = PyElementGenerator.getInstance(project)
         val newBinaryExpression = generator.createBinaryExpression(binOperator, right, left)
-        // Todo: replace { } with the real undo
+        // Todo: replace
         commandsPerformer.performCommand(Command({ replace(newBinaryExpression) }, { }, "Replace binary expression"))
     }
 

@@ -32,7 +32,7 @@ class ConstantFolder(
     private fun simplifyByEvaluation(expression: PyExpression): (() -> PsiElement)? =
         when (val result = evaluator.evaluate(expression)) {
             is PyEvaluatorImproved.PyIntLike -> { ->
-                // Todo: replace { } with the real undo
+                // Todo: replace
                 commandsPerformer.performCommand(
                     Command<PsiElement>(
                         { expression.replace(generator.createIntOrBoolExpression(result)) },
@@ -43,7 +43,7 @@ class ConstantFolder(
             }
             is PyEvaluatorImproved.PyString ->
                 { ->
-                    // Todo: replace { } with the real undo
+                    // Todo: replace
                     commandsPerformer.performCommand(
                         Command<PsiElement>(
                             { expression.replace(generator.createStringLiteralFromString(result.string)) },
@@ -60,7 +60,7 @@ class ConstantFolder(
                 }
                 val simplifyElements = result.elements.map { simplifyAllSubexpressionsDelayed(it) }
                 return@run {
-                    // Todo: replace { } with the real undo
+                    // Todo: replace???
                     commandsPerformer.performCommand(
                         Command<PsiElement>(
                             {
@@ -84,7 +84,7 @@ class ConstantFolder(
             is PyEvaluatorImproved.PyExpressionResult -> run {
                 val simplifyNewExpression = simplifyAllSubexpressionsDelayed(result.expression)
                 return@run {
-                    // Todo: replace { } with the real undo
+                    // Todo: replace
                     commandsPerformer.performCommand(
                         Command<PsiElement>(
                             { expression.replace(simplifyNewExpression()) },
@@ -99,7 +99,7 @@ class ConstantFolder(
                     result.unevaluatedAtoms.map { simplifyAllSubexpressionsDelayed(it.expression) }
                 return@run {
                     commandsPerformer.performCommand(
-                        // Todo: replace { } with the real undo
+                        // Todo: replace???
                         Command<PsiElement>(
                             {
                                 val valueOperand =

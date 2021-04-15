@@ -19,9 +19,9 @@ class AnonymizationVisitor(file: PyFile) : PyRecursiveElementVisitor() {
     fun performAllRenames(commandsPerformer: ICommandPerformer) {
         val allRenames = anonymizer.getAllRenames()
 
-        val commands = allRenames.map { (psi, newName) -> RenamablePsiElement(psi, newName) }
-        commands.forEach {
-            commandsPerformer.performCommand(RenameCommand.getCommand(it, "Anonymize element"))
+        val renamablePsiElements = allRenames.map { (psi, newName) -> RenamablePsiElement(psi, newName) }
+        renamablePsiElements.forEach {
+            commandsPerformer.performCommand(RenameCommand(it).getCommand("Anonymize element"))
         }
     }
 }

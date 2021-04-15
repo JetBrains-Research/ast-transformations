@@ -64,7 +64,7 @@ object TransformationsTestHelper {
         logger.info("The expected code is:\n$expectedSrc")
         ApplicationManager.getApplication().invokeAndWait {
             transformation(psiInFile)
-            PsiTestUtil.checkFileStructure(psiInFile)
+//            PsiTestUtil.checkFileStructure(psiInFile)
         }
         fileHandler.formatPsiFile(psiInFile)
         val actualSrc = psiInFile.text
@@ -79,9 +79,10 @@ object TransformationsTestHelper {
             val commandStorage = CommandPerformer(psi, true)
             forwardTransformation(psi, commandStorage)
             PsiTestUtil.checkFileStructure(psi as PsiFile)
-            WriteCommandAction.runWriteCommandAction(psi.project) {
+//            Todo: call WriteCommandAction inside command?
+//            WriteCommandAction.runWriteCommandAction(psi.project) {
                 commandStorage.undoAllPerformedCommands()
-            }
+//            }
         }
 
     fun getCommandStorageTransformationWrapper(
@@ -92,10 +93,12 @@ object TransformationsTestHelper {
 //          This commandStorage will perform all commands as commandStorageToTest does but with additional check between commands
             val commandStorage = TestCommandPerformer(commandPerformerToTest(psi, true))
             forwardTransformation(psi, commandStorage)
-            PsiTestUtil.checkFileStructure(psi as PsiFile)
-            WriteCommandAction.runWriteCommandAction(psi.project) {
+//            PsiTestUtil.checkFileStructure(psi as PsiFile)
+
+//            Todo: call WriteCommandAction inside command?
+//            WriteCommandAction.runWriteCommandAction(psi.project) {
                 commandStorage.undoAllPerformedCommands()
-            }
+//            }
         }
 }
 
@@ -118,9 +121,6 @@ class TestCommandPerformer(private val performerToTest: ICommandPerformer) : ICo
 //      perform undo and assert equals
         undoPerformedCommands(1)
         val textAfterUndoCommand = PsiText(psiTree)
-
-        codeStyleManager.reformat(psiTree)
-        PsiTestUtil.checkFileStructure(psiTree as PsiFile)
 
 //      not sure should I assert virtual file texts?
         BasePlatformTestCase.assertEquals(

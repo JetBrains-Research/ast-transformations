@@ -54,7 +54,7 @@ internal class ExpressionUnificationVisitor(
         val right = rightExpression ?: return
         val generator = PyElementGenerator.getInstance(project)
         val newBinaryExpression = generator.createBinaryExpression(binOperator, right, left)
-        // Todo: replace { } with the real undo
+        // Todo: replace
         commandPerformer.performCommand(Command({ replace(newBinaryExpression) }, { }, "Replace binary expression"))
     }
 

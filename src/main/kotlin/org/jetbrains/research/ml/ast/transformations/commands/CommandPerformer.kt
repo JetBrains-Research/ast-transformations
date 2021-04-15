@@ -17,12 +17,13 @@ class CommandPerformer(override val psiTree: PsiElement, private val toUndoComma
     private val commands = ArrayDeque<Command<*>>()
 
     //    Should be run in WriteCommandAction
-//    Todo: it's better to wrap command.redo and command.do, see CommentsRemovalVisitor
+//    Todo: it's better to wrap command.redo and command.undo, see CommentsRemovalVisitor
     override fun <T>performCommand(command: Command<T>): T {
+        val result = command.redo.call()
         if (toUndoCommands) {
             commands.addLast(command)
         }
-        return command.redo.call()
+        return result
     }
 
     override fun undoPerformedCommands(n: Int) {
@@ -37,5 +38,4 @@ class CommandPerformer(override val psiTree: PsiElement, private val toUndoComma
         undoPerformedCommands(commands.size)
     }
 }
-
 

@@ -5,8 +5,10 @@ import com.intellij.psi.util.siblings
 import com.jetbrains.python.psi.*
 import org.jetbrains.research.ml.ast.transformations.*
 import org.jetbrains.research.ml.ast.transformations.commands.Command
+import org.jetbrains.research.ml.ast.transformations.commands.DeleteCommand
 import org.jetbrains.research.ml.ast.transformations.commands.ICommandPerformer
 import org.jetbrains.research.ml.ast.transformations.constantfolding.PyEvaluatorImproved
+import org.jetbrains.research.ml.ast.util.runInWCA
 import kotlin.test.fail
 
 class IfRedundantLinesRemover(
@@ -30,10 +32,10 @@ class IfRedundantLinesRemover(
         ): StatementRange {
             val indexOfLast = first.nextStatements().indexOf(last)
             val anchorParent = anchor.parent
-            // Todo: replace { } with the real undo
+            // Todo: addRangeBefore, addRangeAfter
             val newFirst = commandPerformer.performCommand(
                 Command(
-                    {
+                    runInWCA(anchor.project){
                         if (doBefore) {
                             anchorParent.addRangeBefore(first, last, anchor)
                         } else {
@@ -45,10 +47,10 @@ class IfRedundantLinesRemover(
                 )
             )
             val newLast = newFirst.nextStatements().elementAt(indexOfLast)
-            // Todo: replace { } with the real undo
+            // Todo: deleteChildRange
             commandPerformer.performCommand(
                 Command(
-                    { first.parent.deleteChildRange(first, last) },
+                    runInWCA(first.project){ first.parent.deleteChildRange(first, last) },
                     { },
                     "Remove original duplicate statements"
                 )
@@ -63,10 +65,10 @@ class IfRedundantLinesRemover(
         fun removeDuplicates(statementLists: List<List<PyStatement>>, prefixLength: Int, suffixLength: Int) {
             for (statementList in statementLists) {
                 if (prefixLength > 0) {
-                    // Todo: replace { } with the real undo
+                    // Todo: deleteChildRange
                     commandPerformer.performCommand(
                         Command(
-                            {
+                            runInWCA(statementList.first().project){
                                 statementList.first().parent.deleteChildRange(
                                     statementList.first(),
                                     statementList[prefixLength - 1]
@@ -78,10 +80,10 @@ class IfRedundantLinesRemover(
                     )
                 }
                 if (suffixLength > 0) {
-                    // Todo: replace { } with the real undo
+                    // Todo: deleteChildRange
                     commandPerformer.performCommand(
                         Command(
-                            {
+                            runInWCA(statementList.first().project){
                                 statementList.last().parent.deleteChildRange(
                                     statementList[statementList.size - suffixLength],
                                     statementList.last()
@@ -102,19 +104,12 @@ class IfRedundantLinesRemover(
         ) {
             for (index in partsToRemoveIds) {
                 if (conditions.getOrNull(index)?.let { evaluator.canBeProvenPure(it) } != false) {
-                    // Todo: replace { } with the real undo
-                    commandPerformer.performCommand(
-                        Command(
-                            { statementParts[index].delete() },
-                            { },
-                            "Remove redundant part of if statement"
-                        )
-                    )
+                    commandPerformer.performCommand(DeleteCommand(statementParts[index]).getCommand("Remove redundant part of if statement"))
                 } else {
-                    // Todo: replace { } with the real undo
+                    // Todo: add
                     commandPerformer.performCommand(
                         Command(
-                            {
+                            runInWCA(statementParts[index].project){
                                 statementParts[index].add(generator.createPassStatement())
                             },
                             { },
@@ -135,21 +130,14 @@ class IfRedundantLinesRemover(
             // All statements have been selected as parts of a suffix
             if (allConditionsArePure) {
                 newFirst = newFirst.nextStatements().first()
-                // Todo: replace { } with the real undo
-                commandPerformer.performCommand(
-                    Command(
-                        { ifStatement.delete() },
-                        { },
-                        "Delete redundant 'if' statement"
-                    )
-                )
+                commandPerformer.performCommand(DeleteCommand(ifStatement).getCommand("Delete redundant 'if' statement"))
             } else {
                 val disjunction = generator.createBinaryOperandList("or", conditions)
                 val disjunctionStatement = generator.createExpressionStatement(disjunction)
-                // Todo: replace { } with the real undo
+                // Todo: replace
                 newFirst = commandPerformer.performCommand(
                     Command(
-                        { ifStatement.replace(disjunctionStatement) },
+                        runInWCA(ifStatement.project){ ifStatement.replace(disjunctionStatement) },
                         { },
                         "Replace 'if' with just the conditions"
                     )
@@ -283,10 +271,10 @@ class IfRedundantLinesRemover(
                 }
                 else -> fail("Unexpected type of if part encountered")
             }
-            // Todo: replace { } with the real undo
+            // Todo: replace
             commandPerformer.performCommand(
                 Command(
-                    { firstToKeep.replace(replacementPart) },
+                    runInWCA(firstToKeep.project){ firstToKeep.replace(replacementPart) },
                     { },
                     "Replace a part to restore 'if' correctness"
                 )

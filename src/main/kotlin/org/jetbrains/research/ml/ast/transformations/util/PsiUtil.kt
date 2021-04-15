@@ -12,10 +12,10 @@ import org.jetbrains.research.ml.ast.transformations.util.PsiUtil.isTripleQuoted
 
 object PsiUtil {
     fun acceptStatements(project: Project, statements: Collection<PsiElement>, visitor: PsiElementVisitor) {
-        WriteCommandAction.runWriteCommandAction(project) {
+//        WriteCommandAction.runWriteCommandAction(project) {
             for (statement in statements) {
                 statement.accept(visitor)
-            }
+//            }
         }
     }
 

@@ -18,6 +18,7 @@ object IfRedundantLinesRemovalTransformation : Transformation() {
             psiTree.containingFile as PyFile
         )
         val simplify = remover.simplifyAllDelayed(psiTree)
+//      For some reason it fails if run without runWriteCommandAction (although all modification actions are wrapped into WCA)
         WriteCommandAction.runWriteCommandAction(project) { simplify() }
     }
 }

@@ -11,7 +11,9 @@ import com.jetbrains.python.psi.PyIfStatement
 import com.jetbrains.python.psi.PyWhileStatement
 import org.jetbrains.research.ml.ast.transformations.Transformation
 import org.jetbrains.research.ml.ast.transformations.commands.Command
+import org.jetbrains.research.ml.ast.transformations.commands.DeleteCommand
 import org.jetbrains.research.ml.ast.transformations.commands.ICommandPerformer
+import org.jetbrains.research.ml.ast.transformations.commands.RestorablePsiElement
 import org.jetbrains.research.ml.ast.transformations.util.PsiUtil.acceptStatements
 
 object DeadCodeRemovalTransformation : Transformation() {
@@ -27,10 +29,7 @@ object DeadCodeRemovalTransformation : Transformation() {
         psiTree.accept(cfgVisitor)
 
         for (unreachable in cfgVisitor.unreachableElements) {
-            WriteCommandAction.runWriteCommandAction(psiTree.project) {
-                // Todo: replace { } with the real undo
-                commandPerformer.performCommand(Command({ unreachable.delete() }, {}, "Delete unreachable element"))
-            }
+            commandPerformer.performCommand(DeleteCommand(unreachable).getCommand("Delete unreachable element"))
         }
     }
 }

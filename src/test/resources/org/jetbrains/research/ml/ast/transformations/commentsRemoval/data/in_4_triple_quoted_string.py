@@ -6,9 +6,3 @@ quoted
 string
 """
 a = 5
-
-"""
-This is a triple
-quoted
-string
-"""

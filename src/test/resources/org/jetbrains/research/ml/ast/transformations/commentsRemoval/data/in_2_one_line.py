@@ -1,10 +1,10 @@
-# One line comment
-# One line comment
-# One line comment
+# First line comment
+# Second line comment
+# Third line comment
 def foo():
-    # One line comment
+    # Fourth line comment
     pass
 
 a = 5
 
-# One line comment
+# Fifth line comment

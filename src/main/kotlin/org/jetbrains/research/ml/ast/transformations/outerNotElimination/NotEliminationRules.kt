@@ -91,7 +91,7 @@ internal abstract class DeMorganNotEliminationRule : NotEliminationRule() {
             newRightExpression
         )
         val newExpression = generator.createParenthesizedExpression(LanguageLevel.getDefault(), myExpression)
-        // Todo: replace { } with the real undo
+        // Todo: replace
         commandPerformer.performCommand(
             Command({ expression.replace(newExpression) }, { }, "Apply De Morgan's law")
         )

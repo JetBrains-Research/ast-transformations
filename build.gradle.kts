@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version "1.4.32"
     id("org.jetbrains.intellij") version "0.7.2"
     id("com.github.johnrengelman.shadow") version "5.1.0"
     id("org.jetbrains.dokka") version "0.10.1"

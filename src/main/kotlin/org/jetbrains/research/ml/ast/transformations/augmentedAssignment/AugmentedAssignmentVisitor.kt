@@ -14,7 +14,7 @@ internal class AugmentedAssignmentVisitor(private val commandsPerformer: IComman
 
     private fun handleAugAssignment(node: PyAugAssignmentStatement) {
         val newAssignment = PyUtils.createAssignment(node)
-//      Todo: replace { } with a real undo
+//      Todo: replace
         commandsPerformer.performCommand(
             Command({ node.replace(newAssignment) }, { }, "Replace AugAssignment")
         )
