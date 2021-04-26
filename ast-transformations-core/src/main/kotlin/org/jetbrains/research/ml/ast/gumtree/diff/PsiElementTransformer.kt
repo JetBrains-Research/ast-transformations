@@ -4,8 +4,8 @@ import com.github.gumtreediff.actions.model.*
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.util.IncorrectOperationException
 import com.jetbrains.python.psi.LanguageLevel
+import com.jetbrains.python.psi.PyElement
 import com.jetbrains.python.psi.PyElementGenerator
 import org.jetbrains.research.ml.ast.gumtree.psi.getElementChildren
 import org.jetbrains.research.ml.ast.gumtree.tree.Numbering
@@ -34,7 +34,15 @@ class PsiElementTransformer(
 ) {
     private val generator = PyElementGenerator.getInstance(project)
 
-    // Should be run in WriteAction
+    /*
+     * We can sometimes skip some actions since the PSI tree has a more complex structure than the
+     * GumTree one. For example, if we delete a parent in PSI, then all children will automatically be
+     * invalid and deleted, but in the GumTree actions, we will have a delete action for all vertices.
+     * Therefore, in some actions, there is an empty exit from the applying of this action, and
+     * no exception is thrown.
+     *
+     * Should be run in WriteAction
+     */
     private fun applyAction(action: Action, transformation: PsiTransformation) {
         // TODO: should we store actions to compare with transformations actions??
         when (action) {
@@ -46,14 +54,10 @@ class PsiElementTransformer(
         }
     }
 
-    // TODO: it seems we should use simple <applyAction>
     fun applyActions(actions: List<Action>, transformation: PsiTransformation) {
-        actions.forEach {
-            try {
-                applyAction(it, transformation)
-            } catch (e: IncorrectOperationException) {
-                println("Try execute action ${it.name} with node: id=${it.node.id}, label=${it.node.label}, but fail")
-            }
+        val (update, others) = actions.partition { it is Update }
+        (others + update).forEach {
+            applyAction(it, transformation)
         }
     }
 
@@ -118,11 +122,33 @@ class PsiElementTransformer(
 
     private fun Update.apply(transformation: PsiTransformation) {
         val psiElement = this.getPsiElementById(transformation.srcPsiNodes, "Source ")
-        val newText = psiElement.text.replace(this.node.label, this.value)
-        val newElement = generator.createFromText(LanguageLevel.getDefault(), PsiElement::class.java, newText)
-        if (newElement.isValid) {
-            newElement.setId(psiElement.id)
-            transformation.srcPsiNodes[this.node.id] = psiElement.replace(newElement)
+        var newPsiElement: PsiElement? = null
+        var currentPsi = psiElement
+        var currentNode = this.node
+        var rootStartOffset = 0
+        /*
+        * If we just create an element from text, then we can accidentally create an element that
+        * does not match the type of the element being replaced. However, we cannot directly create
+        * all the required types, for example, we cannot create PyReferenceExpression node.
+        * Therefore we are trying to create the smallest possible parent with the new text and replace it
+        * */
+        while (newPsiElement == null) {
+            try {
+                // We should handle renaming as a separated case
+                val newText = (psiElement as? PyElement)?.name?.let {
+                    currentPsi.text
+                        .replaceRange(rootStartOffset, rootStartOffset + this.node.label.length, this.value)
+                } ?: currentPsi.text.replace(this.node.label, this.value)
+                newPsiElement = generator.createFromText(LanguageLevel.getDefault(), currentPsi::class.java, newText)
+            } catch (e: IllegalArgumentException) {
+                rootStartOffset += currentPsi.startOffsetInParent
+                currentPsi = currentPsi.parent ?: return
+                currentNode = currentNode.parent ?: return
+            }
+        }
+        if (newPsiElement.isValid) {
+            newPsiElement.setId(currentPsi.id)
+            transformation.srcPsiNodes[currentNode.id] = currentPsi.replace(newPsiElement)
         }
     }
 
