@@ -1,6 +1,7 @@
 def f1():
-    f1_v1 = 4
-    f1_v2 = 5
+    f1_v1 = input()
+    f1_v2 = 4
+    f1_v3 = 5
 
 
 def f2():

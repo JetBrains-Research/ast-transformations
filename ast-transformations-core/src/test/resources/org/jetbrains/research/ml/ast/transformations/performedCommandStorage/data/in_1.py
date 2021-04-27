@@ -1,4 +1,5 @@
 def some_dead_code():
+    _ = input('hello')
     if 5 == 4:
         print("5 = 4")
     elif 4 == 3:

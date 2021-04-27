@@ -9,6 +9,7 @@ import org.jetbrains.research.ml.ast.transformations.comparisonUnification.Compa
 import org.jetbrains.research.ml.ast.transformations.constantfolding.ConstantFoldingTransformation
 import org.jetbrains.research.ml.ast.transformations.deadcode.DeadCodeRemovalTransformation
 import org.jetbrains.research.ml.ast.transformations.ifRedundantLinesRemoval.IfRedundantLinesRemovalTransformation
+import org.jetbrains.research.ml.ast.transformations.inputDescriptionElimination.InputDescriptionEliminationTransformation
 import org.jetbrains.research.ml.ast.transformations.multipleOperatorComparison.MultipleOperatorComparisonTransformation
 import org.jetbrains.research.ml.ast.transformations.multipleTargetAssignment.MultipleTargetAssignmentTransformation
 import org.jetbrains.research.ml.ast.transformations.outerNotElimination.OuterNotEliminationTransformation
@@ -33,6 +34,7 @@ class PerformedCommandStorageTest : TransformationsWithSdkTest(getResourcesRootP
             CommentsRemovalTransformation,
             AnonymizationTransformation,
             AugmentedAssignmentTransformation,
+            InputDescriptionEliminationTransformation,
             DeadCodeRemovalTransformation,
             ConstantFoldingTransformation,
             MultipleOperatorComparisonTransformation,
